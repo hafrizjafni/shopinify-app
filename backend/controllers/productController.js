@@ -1,7 +1,7 @@
 import Product from '../models/productModel.js';
 
 // @desc    Create new product
-// @route   POST /api/v1/product/new
+// @route   POST /api/v1/admin/product/new
 // @access  Private/Admin
 const newProduct = async (req, res, next) => {
   const product = await Product.create(req.body);
@@ -44,4 +44,55 @@ const getProductById = async (req, res) => {
   }
 };
 
-export { newProduct, getProducts, getProductById };
+// @desc    Update a product
+// @route   PUT /api/v1/admin/product/:id
+// @access  Private/Admin
+const updateProduct = async (req, res) => {
+  let product = await Product.findById(req.params.id);
+
+  if (!product) {
+    res.status(404).json({
+      success: false,
+      message: 'Product not found.',
+    });
+  }
+
+  product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+    product,
+  });
+};
+
+// @desc    Delete a product
+// @route   DELETE /api/admin/product/:id
+// @access  Private/Admin
+const deleteProduct = async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+  if (product) {
+    await product.remove();
+    res.status(200).json({
+      success: true,
+      message: 'Product deleted.',
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      message: 'Product not found.',
+    });
+  }
+};
+
+export {
+  newProduct,
+  getProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+};
